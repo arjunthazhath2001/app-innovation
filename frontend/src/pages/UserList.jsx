@@ -3,9 +3,7 @@ import { useState, useEffect } from 'react';
 import { getUsersList } from '../services/api';
 import { useAuth } from '../context/AuthContext';
 
-const UserList = () => {
-
-const UserList = () => {
+const UserList = () => { // Remove the duplicate declaration
   const { userRole } = useAuth();
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -127,3 +125,6 @@ const UserList = () => {
       )}
     </div>
   );
+};
+
+export default UserList;
