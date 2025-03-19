@@ -1,9 +1,8 @@
 // src/pages/Login.jsx
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { login, verifyLoginOtp } from '../services/api';
+import { login } from '../services/api';
 import { useAuth } from '../context/AuthContext';
-import OTPForm from '../components/OTPForm';
 
 const Login = () => {
   const navigate = useNavigate();
@@ -16,7 +15,6 @@ const Login = () => {
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
-  const [showOtp, setShowOtp] = useState(false);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -34,9 +32,7 @@ const Login = () => {
     try {
       const response = await login(formData);
       
-      if (response.data.require2fa) {
-        setShowOtp(true);
-      } else if (response.data.token) {
+      if (response.data.token) {
         authLogin(response.data.token, formData.role);
         navigate('/dashboard');
       }
@@ -46,27 +42,6 @@ const Login = () => {
       setLoading(false);
     }
   };
-
-  const handleVerifyOtp = async (otpValue) => {
-    try {
-      const response = await verifyLoginOtp({
-        email: formData.email,
-        otp: otpValue,
-        role: formData.role
-      });
-      
-      if (response.data.token) {
-        authLogin(response.data.token, formData.role);
-        navigate('/dashboard');
-      }
-    } catch (err) {
-      throw err;
-    }
-  };
-
-  if (showOtp) {
-    return <OTPForm onVerify={handleVerifyOtp} email={formData.email} role={formData.role} />;
-  }
 
   return (
     <div>

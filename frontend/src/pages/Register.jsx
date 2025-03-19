@@ -1,8 +1,7 @@
 // src/pages/Register.jsx
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { register, verifyOtp } from '../services/api';
-import OTPForm from '../components/OTPForm';
+import { register } from '../services/api';
 
 const Register = () => {
   const navigate = useNavigate();
@@ -11,12 +10,10 @@ const Register = () => {
     lastname: '',
     email: '',
     password: '',
-    role: 'users',
-    enable2fa: false
+    role: 'users'
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
-  const [showOtp, setShowOtp] = useState(false);
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -32,41 +29,15 @@ const Register = () => {
     setError('');
     
     try {
-      const response = await register(formData);
-      
-      if (response.data.require2fa) {
-        setShowOtp(true);
-      } else {
-        alert('Registration successful! Please login.');
-        navigate('/login');
-      }
+      await register(formData);
+      alert('Registration successful! Please login.');
+      navigate('/login');
     } catch (err) {
       setError(err.response?.data?.message || 'Registration failed');
     } finally {
       setLoading(false);
     }
   };
-
-  const handleVerifyOtp = async (otpValue) => {
-    try {
-      const response = await verifyOtp({
-        email: formData.email,
-        otp: otpValue,
-        role: formData.role
-      });
-      
-      if (response.data.verified) {
-        alert('OTP verification successful! Please login.');
-        navigate('/login');
-      }
-    } catch (err) {
-      throw err;
-    }
-  };
-
-  if (showOtp) {
-    return <OTPForm onVerify={handleVerifyOtp} email={formData.email} role={formData.role} />;
-  }
 
   return (
     <div>
@@ -148,18 +119,6 @@ const Register = () => {
               onChange={handleChange}
             />
             Admin
-          </label>
-        </div>
-        
-        <div style={{ marginBottom: '1rem' }}>
-          <label>
-            <input
-              type="checkbox"
-              name="enable2fa"
-              checked={formData.enable2fa}
-              onChange={handleChange}
-            />
-            Enable 2FA Authentication
           </label>
         </div>
         

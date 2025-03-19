@@ -25,23 +25,13 @@ api.interceptors.request.use(
 
 // Auth services
 export const register = async (userData) => {
-  const { firstname, lastname, email, password, role, enable2fa } = userData;
-  return api.post(`/${role}/signup`, { firstname, lastname, email, password, enable2fa });
-};
-
-export const verifyOtp = async (data) => {
-  const { email, otp, role } = data;
-  return api.post(`/${role}/verify-otp`, { email, otp });
+  const { firstname, lastname, email, password, role } = userData;
+  return api.post(`/${role}/signup`, { firstname, lastname, email, password });
 };
 
 export const login = async (credentials) => {
   const { email, password, role } = credentials;
   return api.post(`/${role}/signin`, { email, password });
-};
-
-export const verifyLoginOtp = async (data) => {
-  const { email, otp, role } = data;
-  return api.post(`/${role}/verify-login-otp`, { email, otp });
 };
 
 export const getProfile = async (role) => {

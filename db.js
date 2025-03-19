@@ -6,10 +6,7 @@ const userSchema = new Schema({
     lastname: String,
     email: {type: String, unique: true},
     password: String,
-    enable2fa: {type: Boolean, default: false},
-    otp: String,
-    otpExpiry: Date,
-    isVerified: {type: Boolean, default: false}
+    isVerified: {type: Boolean, default: true}
 })
 
 const adminSchema = new Schema({
@@ -17,10 +14,7 @@ const adminSchema = new Schema({
     lastname: String,
     email: {type: String, unique: true},
     password: String,
-    enable2fa: {type: Boolean, default: false},
-    otp: String,
-    otpExpiry: Date,
-    isVerified: {type: Boolean, default: false}
+    isVerified: {type: Boolean, default: true}
 })
 
 const UserModel = mongoose.model('user', userSchema)
