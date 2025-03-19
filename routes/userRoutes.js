@@ -1,28 +1,18 @@
 // routes/userRoutes.js
 const {Router} = require('express')
 const {UserModel} = require('../db')
-const { z } = require('zod')
 const bcrypt = require('bcrypt')
 const userRouter = Router()
 const jwt = require('jsonwebtoken')
 const {userMiddleware} = require('../middlewares/users')
 
 userRouter.post('/signup', async function(req, res) {
-    const requiredBody = z.object({
-        firstname: z.string().regex(/^[A-Za-z]+$/).min(2).max(100),
-        lastname: z.string().regex(/^[A-Za-z]+$/).min(2).max(100),
-        password: z.string().min(2).max(100),
-        email: z.string().email().min(2).max(100)
-    });
-    
-    const parsedBody = requiredBody.safeParse(req.body);
-    if(!parsedBody.success) {
-        res.json(parsedBody.error);
-        return;
-    }
-
     const {firstname, lastname, email, password} = req.body;
-    const hashedPassword = await bcrypt.hash(password, 5);
+    
+    // Basic validation without Zod
+    if (!firstname || !lastname || !email || !password) {
+        return res.status(400).json({ message: "All fields are required" });
+    }
     
     try {
         // Check if user already exists
@@ -30,6 +20,9 @@ userRouter.post('/signup', async function(req, res) {
         if (existingUser) {
             return res.status(400).json({ message: "Email already in use" });
         }
+        
+        // Hash password
+        const hashedPassword = await bcrypt.hash(password, 5);
         
         // Create user
         await UserModel.create({
@@ -49,6 +42,10 @@ userRouter.post('/signup', async function(req, res) {
 
 userRouter.post('/signin', async function(req, res) {
     const { email, password } = req.body;
+    
+    if (!email || !password) {
+        return res.status(400).json({ message: "Email and password are required" });
+    }
     
     try {
         const user = await UserModel.findOne({ email });
