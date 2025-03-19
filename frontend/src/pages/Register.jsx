@@ -14,6 +14,7 @@ const Register = () => {
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [success, setSuccess] = useState('');
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -27,13 +28,42 @@ const Register = () => {
     e.preventDefault();
     setLoading(true);
     setError('');
+    setSuccess('');
+    
+    // Basic form validation
+    if (!formData.firstname || !formData.lastname || !formData.email || !formData.password) {
+      setError('All fields are required');
+      setLoading(false);
+      return;
+    }
+    
+    // Email validation
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(formData.email)) {
+      setError('Please enter a valid email address');
+      setLoading(false);
+      return;
+    }
+    
+    // Password validation (at least 6 characters)
+    if (formData.password.length < 6) {
+      setError('Password must be at least 6 characters long');
+      setLoading(false);
+      return;
+    }
     
     try {
-      await register(formData);
-      alert('Registration successful! Please login.');
-      navigate('/login');
+      console.log('Submitting registration data:', formData);
+      const response = await register(formData);
+      console.log('Registration response:', response);
+      
+      setSuccess('Registration successful! Redirecting to login...');
+      setTimeout(() => {
+        navigate('/login');
+      }, 2000);
     } catch (err) {
-      setError(err.response?.data?.message || 'Registration failed');
+      console.error('Registration error:', err);
+      setError(err.response?.data?.message || 'Registration failed. Please try again.');
     } finally {
       setLoading(false);
     }
@@ -43,7 +73,17 @@ const Register = () => {
     <div>
       <h2>Register</h2>
       
-      {error && <div style={{ color: 'red', marginBottom: '1rem' }}>{error}</div>}
+      {error && (
+        <div style={{ color: 'red', backgroundColor: '#ffeeee', padding: '10px', borderRadius: '4px', marginBottom: '1rem' }}>
+          {error}
+        </div>
+      )}
+      
+      {success && (
+        <div style={{ color: 'green', backgroundColor: '#eeffee', padding: '10px', borderRadius: '4px', marginBottom: '1rem' }}>
+          {success}
+        </div>
+      )}
       
       <form onSubmit={handleSubmit}>
         <div style={{ marginBottom: '1rem' }}>
@@ -96,27 +136,30 @@ const Register = () => {
             style={{ display: 'block', width: '100%', padding: '0.5rem' }}
             required
           />
+          <small style={{ color: '#666' }}>Password must be at least 6 characters long</small>
         </div>
         
         <div style={{ marginBottom: '1rem' }}>
           <div>Role</div>
-          <label style={{ marginRight: '1rem' }}>
+          <label style={{ marginRight: '1rem', display: 'inline-flex', alignItems: 'center' }}>
             <input
               type="radio"
               name="role"
               value="users"
               checked={formData.role === 'users'}
               onChange={handleChange}
+              style={{ marginRight: '5px' }}
             />
             User
           </label>
-          <label>
+          <label style={{ display: 'inline-flex', alignItems: 'center' }}>
             <input
               type="radio"
               name="role"
               value="admin"
               checked={formData.role === 'admin'}
               onChange={handleChange}
+              style={{ marginRight: '5px' }}
             />
             Admin
           </label>
@@ -131,7 +174,9 @@ const Register = () => {
             padding: '0.5rem 1rem',
             border: 'none',
             cursor: loading ? 'not-allowed' : 'pointer',
-            opacity: loading ? 0.7 : 1
+            opacity: loading ? 0.7 : 1,
+            borderRadius: '4px',
+            fontSize: '1rem'
           }}
         >
           {loading ? 'Registering...' : 'Register'}

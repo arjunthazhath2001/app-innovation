@@ -29,15 +29,30 @@ const Login = () => {
     setLoading(true);
     setError('');
     
+    // Basic form validation
+    if (!formData.email || !formData.password) {
+      setError('Email and password are required');
+      setLoading(false);
+      return;
+    }
+    
     try {
+      console.log('Submitting login data:', formData);
       const response = await login(formData);
+      console.log('Login response:', response);
       
-      if (response.data.token) {
+      if (response.data && response.data.token) {
+        console.log('Login successful, storing token and role');
+        // Store token and role in localStorage
         authLogin(response.data.token, formData.role);
+        // Redirect to dashboard
         navigate('/dashboard');
+      } else {
+        setError('Invalid response from server');
       }
     } catch (err) {
-      setError(err.response?.data?.message || 'Login failed');
+      console.error('Login error:', err);
+      setError(err.response?.data?.message || 'Login failed. Please check your credentials.');
     } finally {
       setLoading(false);
     }
@@ -47,7 +62,11 @@ const Login = () => {
     <div>
       <h2>Login</h2>
       
-      {error && <div style={{ color: 'red', marginBottom: '1rem' }}>{error}</div>}
+      {error && (
+        <div style={{ color: 'red', backgroundColor: '#ffeeee', padding: '10px', borderRadius: '4px', marginBottom: '1rem' }}>
+          {error}
+        </div>
+      )}
       
       <form onSubmit={handleSubmit}>
         <div style={{ marginBottom: '1rem' }}>
@@ -78,23 +97,25 @@ const Login = () => {
         
         <div style={{ marginBottom: '1rem' }}>
           <div>Role</div>
-          <label style={{ marginRight: '1rem' }}>
+          <label style={{ marginRight: '1rem', display: 'inline-flex', alignItems: 'center' }}>
             <input
               type="radio"
               name="role"
               value="users"
               checked={formData.role === 'users'}
               onChange={handleChange}
+              style={{ marginRight: '5px' }}
             />
             User
           </label>
-          <label>
+          <label style={{ display: 'inline-flex', alignItems: 'center' }}>
             <input
               type="radio"
               name="role"
               value="admin"
               checked={formData.role === 'admin'}
               onChange={handleChange}
+              style={{ marginRight: '5px' }}
             />
             Admin
           </label>
@@ -108,8 +129,10 @@ const Login = () => {
             color: 'white',
             padding: '0.5rem 1rem',
             border: 'none',
+            borderRadius: '4px',
             cursor: loading ? 'not-allowed' : 'pointer',
-            opacity: loading ? 0.7 : 1
+            opacity: loading ? 0.7 : 1,
+            fontSize: '1rem'
           }}
         >
           {loading ? 'Logging in...' : 'Login'}
