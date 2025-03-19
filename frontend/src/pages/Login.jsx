@@ -37,12 +37,9 @@ const Login = () => {
     }
     
     try {
-      console.log('Submitting login data:', formData);
       const response = await login(formData);
-      console.log('Login response:', response);
       
       if (response.data && response.data.token) {
-        console.log('Login successful, storing token and role');
         // Store token and role in localStorage
         authLogin(response.data.token, formData.role);
         // Redirect to dashboard
@@ -51,7 +48,6 @@ const Login = () => {
         setError('Invalid response from server');
       }
     } catch (err) {
-      console.error('Login error:', err);
       setError(err.response?.data?.message || 'Login failed. Please check your credentials.');
     } finally {
       setLoading(false);
@@ -131,8 +127,7 @@ const Login = () => {
             border: 'none',
             borderRadius: '4px',
             cursor: loading ? 'not-allowed' : 'pointer',
-            opacity: loading ? 0.7 : 1,
-            fontSize: '1rem'
+            opacity: loading ? 0.7 : 1
           }}
         >
           {loading ? 'Logging in...' : 'Login'}

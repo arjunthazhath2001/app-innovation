@@ -17,10 +17,10 @@ const Register = () => {
   const [success, setSuccess] = useState('');
 
   const handleChange = (e) => {
-    const { name, value, type, checked } = e.target;
+    const { name, value } = e.target;
     setFormData({
       ...formData,
-      [name]: type === 'checkbox' ? checked : value
+      [name]: value
     });
   };
 
@@ -53,16 +53,13 @@ const Register = () => {
     }
     
     try {
-      console.log('Submitting registration data:', formData);
       const response = await register(formData);
-      console.log('Registration response:', response);
       
       setSuccess('Registration successful! Redirecting to login...');
       setTimeout(() => {
         navigate('/login');
       }, 2000);
     } catch (err) {
-      console.error('Registration error:', err);
       setError(err.response?.data?.message || 'Registration failed. Please try again.');
     } finally {
       setLoading(false);
@@ -175,8 +172,7 @@ const Register = () => {
             border: 'none',
             cursor: loading ? 'not-allowed' : 'pointer',
             opacity: loading ? 0.7 : 1,
-            borderRadius: '4px',
-            fontSize: '1rem'
+            borderRadius: '4px'
           }}
         >
           {loading ? 'Registering...' : 'Register'}
@@ -191,3 +187,4 @@ const Register = () => {
 };
 
 export default Register;
+

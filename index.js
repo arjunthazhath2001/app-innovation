@@ -1,3 +1,4 @@
+// index.js
 require('dotenv').config()
 const express = require('express')
 const {userRouter} = require('./routes/userRoutes')
@@ -6,13 +7,10 @@ const app = express()
 const mongoose = require('mongoose')
 const cors = require('cors')
 
-// Enable CORS
-// In your backend index.js
 app.use(cors({
     origin: 'http://localhost:5173', 
     credentials: true
-  }));
-
+}));
 
 app.use(express.json())
 
