@@ -1,0 +1,127 @@
+<!-- public/dashboard.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .welcome-container {
+            margin-bottom: 30px;
+        }
+        .user-list {
+            border: 1px solid #ddd;
+            padding: 15px;
+            margin-top: 20px;
+        }
+        .user-item {
+            padding: 8px 0;
+            border-bottom: 1px solid #eee;
+        }
+        button {
+            background-color: #f44336;
+            color: white;
+            padding: 8px 12px;
+            border: none;
+            cursor: pointer;
+            margin-top: 20px;
+        }
+        .admin-only {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="welcome-container">
+        <h2>Welcome to your Dashboard</h2>
+        <p id="userGreeting">Loading user information...</p>
+    </div>
+
+    <div id="adminSection" class="admin-only">
+        <h3>User Management</h3>
+        <p>As an admin, you can view all registered users.</p>
+        
+        <div class="user-list" id="userList">
+            <p>Loading users...</p>
+        </div>
+    </div>
+
+    <button id="logoutBtn">Logout</button>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', async function() {
+            const token = localStorage.getItem('token');
+            const role = localStorage.getItem('role');
+            
+            if (!token) {
+                window.location.href = '/login.html';
+                return;
+            }
+
+            // Load user profile
+            try {
+                const profileResponse = await fetch(`/api/v1/${role}/profile`, {
+                    headers: {
+                        'token': token
+                    }
+                });
+                
+                const profileData = await profileResponse.json();
+                
+                if (profileData.user) {
+                    document.getElementById('userGreeting').textContent = 
+                        `Hello, ${profileData.user.firstname} ${profileData.user.lastname}!`;
+                }
+            } catch (error) {
+                console.error('Error fetching profile:', error);
+                alert('Session expired. Please login again.');
+                window.location.href = '/login.html';
+            }
+
+            // If admin, load user list
+            if (role === 'admin') {
+                document.getElementById('adminSection').style.display = 'block';
+                try {
+                    const usersResponse = await fetch('/api/v1/admin/users', {
+                        headers: {
+                            'token': token
+                        }
+                    });
+                    
+                    const usersData = await usersResponse.json();
+                    
+                    const userListContainer = document.getElementById('userList');
+                    
+                    if (usersData.users && usersData.users.length > 0) {
+                        userListContainer.innerHTML = '';
+                        usersData.users.forEach(user => {
+                            const userElement = document.createElement('div');
+                            userElement.className = 'user-item';
+                            userElement.textContent = `${user.firstname} ${user.lastname} (${user.email})`;
+                            userListContainer.appendChild(userElement);
+                        });
+                    } else {
+                        userListContainer.innerHTML = '<p>No users found.</p>';
+                    }
+                } catch (error) {
+                    console.error('Error fetching users:', error);
+                    document.getElementById('userList').innerHTML = '<p>Error loading users.</p>';
+                }
+            }
+
+            // Logout functionality
+            document.getElementById('logoutBtn').addEventListener('click', function() {
+                localStorage.removeItem('token');
+                localStorage.removeItem('role');
+                window.location.href = '/login.html';
+            });
+        });
+    </script>
+</body>
+</html>
